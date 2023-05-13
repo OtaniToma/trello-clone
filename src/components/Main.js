@@ -6,8 +6,27 @@ import dummyData from "../dummyData";
 const Main = () => {
   const [data, setData] = useState(dummyData);
 
+  const onDragEnd = (result) => {
+    const { source, destination } = result;
+
+    // 同じカラム内でのタスクの入れ替え
+    const sourceColIndex = data.findIndex((e) => e.id === source.droppableId);
+    console.log(sourceColIndex);
+    const sourceCol = data[sourceColIndex];
+    console.log(sourceCol);
+
+    const sourceTask = [...sourceCol.tasks];
+    // タスクを削除
+    const [removed] = sourceTask.splice(source.index, 1);
+    // タスクを追加
+    sourceTask.splice(destination.index, 0, removed);
+
+    data[sourceColIndex].tasks = sourceTask;
+    setData(data);
+  };
+
   return (
-    <DragDropContext>
+    <DragDropContext onDragEnd={onDragEnd}>
       <div className="trello">
         {data.map((section) => (
           <Droppable key={section.id} droppableId={section.id}>
@@ -32,14 +51,15 @@ const Main = () => {
                           {...provided.dragHandleProps}
                           style={{
                             ...provided.draggableProps.style,
-                            opacity: snapshot.isDragging ? "0.5" : "1",
+                            opacity: snapshot.isDragging ? "0.3" : "1",
                           }}
                         >
-                          <Card></Card>
+                          <Card>{task.title}</Card>
                         </div>
                       )}
                     </Draggable>
                   ))}
+                  {provided.placeholder}
                 </div>
               </div>
             )}
